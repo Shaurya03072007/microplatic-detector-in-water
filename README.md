@@ -51,46 +51,45 @@ server/
 
 ---
 
-## 🚀 How to Run
+## 🚀 How to Live Deploy to Render.com (Free Tier)
 
-Because the application is split into a Python Backend and a Node Frontend, you need to start **both** servers to view the dashboard properly.
+If you don't want to use the Blueprint auto-deploy, you can easily deploy both services manually from the exact same GitHub repository.
 
-### Part 1: Start the Backend (FastAPI)
+### 1. Deploy the Python Backend (Web Service)
+1. In the Render Dashboard, click **New +** and select **Web Service**.
+2. Connect your GitHub repository.
+3. Configure the settings as follows:
+   * **Name**: Microplastics-API (or similar)
+   * **Environment**: `Python 3`
+   * **Build Command**: `pip install -r requirements.txt`
+   * **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+4. Select the **Free** instance type and click **Create Web Service**.
+5. Once it Deploys, Render will give you a public URL (e.g., `https://microplastics-api.onrender.com`). Copy this!
 
-1. Open a terminal and navigate to the `server/` root folder.
-2. Ensure you have the required Python libraries installed:
-   ```bash
-   pip install fastapi uvicorn python-multipart opencv-python numpy sqlalchemy
-   ```
-3. Boot up the Uvicorn server on **Port 8001** (to avoid conflicts with standard web ports):
-   ```bash
-   uvicorn main:app --host 0.0.0.0 --port 8001
-   ```
-   *The backend should now be running, ready to accept uploads from the Pi!*
-
-### Part 2: Start the Frontend (React Dashboard)
-
-1. Open a **second** terminal and navigate specifically into the `frontend/` folder:
-   ```bash
-   cd frontend
-   ```
-2. Install the necessary Node packages (if you haven't already):
-   ```bash
-   npm install
-   ```
-3. Start the Vite development server:
-   ```bash
-   npm run dev
-   ```
-4. The terminal will provide a `http://localhost:5173` link (or similar, depending on availability). Open that link in your browser to view the Microplastics Dashboard!
+### 2. Deploy the React Dashboard (Static Site)
+1. Go back to the Render Dashboard, click **New +** and select **Static Site**.
+2. Connect the exact same GitHub repository you used for the backend!
+3. Configure the settings as follows:
+   * **Name**: AquaSense-Dashboard (or similar)
+   * **Root Directory**: `frontend`  *(<-- Very Important!)*
+   * **Build Command**: `npm install && npm run build`
+   * **Publish Directory**: `dist`
+4. Scroll down to **Advanced** -> **Environment Variables**. Add a new one:
+   * **Key**: `VITE_API_URL`
+   * **Value**: Paste the API URL you copied from Step 1! (e.g., `https://microplastics-api.onrender.com`)
+5. Click **Create Static Site**.
+6. When your site deploys, click on the **Redirects/Rewrites** tab on the left menu, and add a rule: 
+   * **Source**: `/*` 
+   * **Destination**: `/index.html` 
+   * **Action**: `Rewrite`. (This ensures React Router works correctly).
 
 ---
 
 ## 🚨 Final Note: Update your Raspberry Pi
 
-Because we upgraded the architecture to use a professional API, the routing port was changed. You must update your polling script on the Raspberry Pi to point to the new port **8001**.
+Because we upgraded the architecture to use a professional API, you must update your polling script on the Raspberry Pi to point to your new Live URL.
 
 ```python
-# Change your existing constant in your pi script to:
-BACKEND_URL = "http://<YOUR_LAPTOP_IP_ADDRESS>:8001/upload"
+# Change your existing constant in your pi script to the public backend:
+BACKEND_URL = "https://microplastics-api.onrender.com/upload"
 ```

@@ -27,7 +27,8 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 # Mount the static files directory to serve images directly
 app.mount("/images", StaticFiles(directory=UPLOAD_DIR), name="images")
 
-@app.get("/")
+# Endpoints
+@app.get("/api/health")
 def read_root():
     return {"status": "Camera backend running."}
 
@@ -88,9 +89,19 @@ def get_history(limit: int = 50, db: Session = Depends(database.get_db)):
         history_data.append({
             "id": r.id,
             "timestamp": r.timestamp.isoformat() + "Z", # Ensure UTC timezone notation
+            "percentage": r.percentage,
+            "original_filename": r.original_filename,
             "original_image": f"/images/{r.original_filename}" if r.original_filename else None,
-            "detected_image": f"/images/{r.detected_filename}" if r.detected_filename else None,
-            "percentage": r.percentage
+            "detected_image": f"/images/{r.detected_filename}" if r.detected_filename else None
         })
         
     return history_data
+
+
+# --- FRONTEND SERVING ---
+# Mount the React build directory LAST so it doesn't override /api routes
+frontend_dist = os.path.join(os.path.dirname(__file__), "frontend", "dist")
+if os.path.exists(frontend_dist):
+    app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="frontend")
+else:
+    print("WARNING: frontend/dist not found. Did you run `npm run build`?")

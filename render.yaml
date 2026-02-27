@@ -1,12 +1,13 @@
 services:
-  # 1. The FastAPI Backend
+  # 1. The FastAPI Backend (Runs on the Free Web Tier)
   - type: web
     name: microplastics-api
     env: python
+    plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
 
-  # 2. The React Frontend Dashboard
+  # 2. The React Frontend Dashboard (Runs on the Free Static Tier)
   - type: web
     name: microplastics-dashboard
     env: static
