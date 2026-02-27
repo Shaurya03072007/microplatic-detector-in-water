@@ -7,7 +7,7 @@ import {
   RefreshCw, Settings2, Sparkles, Server, Zap
 } from 'lucide-react';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001' || 'https://microplatic-detector-in-water.onrender.com/';
 
 function App() {
   const [history, setHistory] = useState([]);
